@@ -13,6 +13,7 @@
     "@emotion/react": "^11.13.5",
     "@emotion/styled": "^11.13.5",
     "@fontsource/roboto": "^5.1.0",
+    "@googlemaps/react-wrapper": "^1.1.42",
     "@mui/icons-material": "^6.1.9",
     "@mui/material": "^6.1.9",
     "@vis.gl/react-google-maps": "^1.4.2",

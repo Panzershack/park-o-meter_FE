@@ -1,0 +1,8 @@
+.directions {
+    position: absolute;
+    background: black;
+    top: 1rem;
+    right: 1ren;
+    width: 25%;
+    padding: 1rem;
+}
