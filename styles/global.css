@@ -1,8 +1,43 @@
-.directions {
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    background-color: #413f3f; /* Light gray background for contrast */
+    color: #333; /* Dark gray text for readability */
+    line-height: 1.5;
+  }
+  
+  .directions {
     position: absolute;
-    background: black;
     top: 1rem;
-    right: 1ren;
+    right: 1rem;
     width: 25%;
     padding: 1rem;
-}
+    background: rgba(34, 32, 32, 0.9); /* Slightly transparent white */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+    border-radius: 12px; /* Rounded edges */
+    border: 1px solid #ddd; /* Light border for a clean look */
+    z-index: 1000; /* Ensure it's above the map */
+  }
+  
+  /* Add styling to headings and paragraphs inside the directions box */
+  .directions h2 {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+    color: #ffffff;
+  }
+  
+  .directions h3 {
+    font-size: 1rem;
+    margin-top: 0.75rem;
+    margin-bottom: 0.25rem;
+    color: #2f90e0; /* Darker gray for subheadings */
+  }
+  
+  .directions p {
+    margin: 0.25rem 0;
+    font-size: 0.875rem;
+    color: #ffffff;
+  }
+  

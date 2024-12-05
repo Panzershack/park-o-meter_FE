@@ -1,5 +1,7 @@
+import "../../styles/global.css"
 import React, { useState, useEffect, useRef } from "react";
 import { Wrapper } from "@googlemaps/react-wrapper";
+import { getGeocode, getLatLng } from "use-places-autocomplete";
 
 const mapOptions = {
   mapId: import.meta.env.VITE_PUBLIC_MAP_ID,
@@ -36,10 +38,52 @@ function MyMap() {
 }
 
 function Directions({setRoute}) {
-  const [origin] = useState("Newton COurt Hatfield"); //these are hardcoded here these can be swapped to dynamic by using the google places API
+  const [origin] = useState("Newton Court Hatfield"); //these are hardcoded here these can be swapped to dynamic by using the google places API
   const [destination] = useState("Galleri Hatfield");
 
-  return <div className="direction">
+  useEffect(() => {
+    fetchDirections(origin, destination, setRoute);
+  }, [origin, destination]);
 
+  return <div className="directions">
+    <h2>Direction</h2>
+    <h3>Origin</h3>
+    <p>{origin}</p>
+    <h3>Destination</h3>
+    <p>{destination}</p>
   </div>
+}
+
+async function fetchDirections(origin, destination, setRoute) {
+  const [originResults, destinationResults] = await Promise.all([
+  // this function will convert the origin and destination into latitiude and longitude using a package
+    getGeocode({address: origin}),
+    getGeocode({address: destination}),
+  ]);
+
+  const [originLocation, destinationLocation] = await Promise.all([
+      getLatLng(originResults[0]),
+      getLatLng(destinationResults[0]),
+    ]);
+
+    const services = new google.maps.DirectionsService();
+    services.route({
+      origin: originLocation,
+      destination: destinationLocation,
+      travelMode: google.maps.TravelMode.DRIVING
+    },
+    (result, status) => {
+      if (status == "OK" && result) {
+        const route = result.routes[0].overview_path.map(path => (
+          {
+            lat: path.lat(), 
+            lng: path.lng()
+          }));
+          setRoute(route);
+      }
+    }
+  );
+
+    console.log({originLocation, destinationLocation});
+
 }
