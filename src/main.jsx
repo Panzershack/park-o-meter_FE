@@ -5,7 +5,6 @@ import CarAnim from './components/carAnim.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    {/* <App /> */}
-    <CarAnim/>
+    <App />
   </StrictMode>,
 )

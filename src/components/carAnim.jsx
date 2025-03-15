@@ -1,4 +1,4 @@
-import "../../styles/global.css"
+import "../../styles/global.css";
 import React, { useState, useEffect, useRef } from "react";
 import { Wrapper } from "@googlemaps/react-wrapper";
 import { getGeocode, getLatLng } from "use-places-autocomplete";
@@ -21,9 +21,9 @@ export default function App() {
 }
 
 function MyMap() {
-    const [route, setRoute] = useState(); //need this to draw the route and make the car run
-    const [map, setMap] = useState(null); // Initialize state correctly
-    const ref = useRef(null); // Initialize ref correctly
+  const [route, setRoute] = useState(null);
+  const [map, setMap] = useState(null);
+  const ref = useRef(null);
 
   useEffect(() => {
     if (ref.current && !map) {
@@ -31,59 +31,116 @@ function MyMap() {
     }
   }, [map]);
 
-  return <>
-  <div ref={ref} id="map" style={{ height: "100vh", width: "100%" }}/>
-  {map && <Directions setRoute={setRoute}/>}
-  </>
+  return (
+    <>
+      <div ref={ref} id="map" style={{ height: "100vh", width: "100%" }} />
+      {map && <Directions setRoute={setRoute} />}
+      {map && route && <RouteAnimation map={map} route={route} />}
+    </>
+  );
 }
 
-function Directions({setRoute}) {
-  const [origin] = useState("Newton Court Hatfield"); //these are hardcoded here these can be swapped to dynamic by using the google places API
-  const [destination] = useState("Galleri Hatfield");
+function RouteAnimation({ map, route }) {
+  useEffect(() => {
+    if (!route || route.length === 0) return;
+    // Center the map on the midpoint of the route
+    const middleIndex = Math.floor(route.length / 2);
+    map.setCenter(route[middleIndex]);
+
+    // Draw the route with a blue polyline
+    const polyline = new google.maps.Polyline({
+      path: route,
+      geodesic: true,
+      strokeColor: "#0000FF", // Blue color
+      strokeOpacity: 1.0,
+      strokeWeight: 4,
+    });
+    polyline.setMap(map);
+
+    // Mark the start and end points with red markers
+    const startMarker = new google.maps.Marker({
+      position: route[0],
+      map: map,
+      icon: {
+        url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+      },
+    });
+
+    const endMarker = new google.maps.Marker({
+      position: route[route.length - 1],
+      map: map,
+      icon: {
+        url: "http://maps.google.com/mapfiles/ms/icons/red-dot.png",
+      },
+    });
+
+    // Log for debugging
+    console.log("Route drawn with", route.length, "points.");
+
+    // Cleanup markers and polyline when the route updates
+    return () => {
+      polyline.setMap(null);
+      startMarker.setMap(null);
+      endMarker.setMap(null);
+    };
+  }, [map, route]);
+
+  return null;
+}
+
+function Directions({ setRoute }) {
+  const [origin] = useState("WD23 4HH");
+  const [destination] = useState("WD23 4PA");
 
   useEffect(() => {
     fetchDirections(origin, destination, setRoute);
-  }, [origin, destination]);
+  }, [origin, destination, setRoute]);
 
-  return <div className="directions">
-    <h2>Direction</h2>
-    <h3>Origin</h3>
-    <p>{origin}</p>
-    <h3>Destination</h3>
-    <p>{destination}</p>
-  </div>
+  return (
+    <div className="directions">
+      <h2>Direction</h2>
+      <h3>Origin</h3>
+      <p>{origin}</p>
+      <h3>Destination</h3>
+      <p>{destination}</p>
+    </div>
+  );
 }
 
 async function fetchDirections(origin, destination, setRoute) {
-  const [originResults, destinationResults] = await Promise.all([
-  // this function will convert the origin and destination into latitiude and longitude using a package
-    getGeocode({address: origin}),
-    getGeocode({address: destination}),
-  ]);
-
-  const [originLocation, destinationLocation] = await Promise.all([
+  try {
+    const [originResults, destinationResults] = await Promise.all([
+      getGeocode({ address: origin }),
+      getGeocode({ address: destination }),
+    ]);
+    const [originLocation, destinationLocation] = await Promise.all([
       getLatLng(originResults[0]),
       getLatLng(destinationResults[0]),
     ]);
 
-    const services = new google.maps.DirectionsService();
-    services.route({
-      origin: originLocation,
-      destination: destinationLocation,
-      travelMode: google.maps.TravelMode.DRIVING
-    },
-    (result, status) => {
-      if (status == "OK" && result) {
-        const route = result.routes[0].overview_path.map(path => (
-          {
-            lat: path.lat(), 
-            lng: path.lng()
+    console.log("Origin & Destination:", { originLocation, destinationLocation });
+
+    const directionsService = new google.maps.DirectionsService();
+    directionsService.route(
+      {
+        origin: originLocation,
+        destination: destinationLocation,
+        travelMode: google.maps.TravelMode.DRIVING,
+      },
+      (result, status) => {
+        if (status === "OK" && result) {
+          const routePath = result.routes[0].overview_path.map((point) => ({
+            lat: point.lat(),
+            lng: point.lng(),
           }));
-          setRoute(route);
+          console.log("Route Path:", routePath);
+          setRoute(routePath);
+        } else {
+          console.error("Directions request failed due to", status);
+        }
       }
-    }
-  );
-
-    console.log({originLocation, destinationLocation});
-
+    );
+  } catch (error) {
+    console.error("Error fetching directions:", error);
+  }
 }

@@ -1,43 +1,196 @@
-
+/* Global styles for Park-O-Meter Application */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 body {
-    margin: 0;
-    padding: 0;
-    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
-    background-color: #413f3f; /* Light gray background for contrast */
-    color: #333; /* Dark gray text for readability */
-    line-height: 1.5;
+  font-family: 'Poppins', sans-serif;
+  background-color: #F2EFE7;
+  color: #333333;
+}
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: #9ACBD0;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #48A6A7;
+}
+/* Map styles */
+.map-container {
+  height: 100vh;
+  width: 100%;
+}
+.map-overlay-message {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  max-width: 500px;
+}
+/* MUI overrides */
+.MuiTextField-root .MuiOutlinedInput-root:hover .MuiOutlinedInput-notchedOutline {
+  border-color: #48A6A7;
+}
+.MuiTextField-root .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: #48A6A7;
+}
+.MuiTextField-root .MuiInputLabel-root.Mui-focused {
+  color: #48A6A7;
+}
+.MuiButton-containedPrimary {
+  background-color: #48A6A7 !important;
+}
+.MuiButton-containedPrimary:hover {
+  background-color: #2973B2 !important;
+}
+.MuiButton-outlinedPrimary {
+  border-color: #48A6A7 !important;
+  color: #48A6A7 !important;
+}
+.MuiButton-outlinedPrimary:hover {
+  background-color: rgba(72, 166, 167, 0.1) !important;
+}
+/* Direction styles */
+.directions {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  z-index: 2;
+  max-width: 300px;
+}
+.directions h2 {
+  color: #2973B2;
+  margin-bottom: 10px;
+  font-size: 18px;
+}
+.directions h3 {
+  color: #48A6A7;
+  margin-top: 10px;
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+.directions p {
+  margin: 0;
+  font-size: 14px;
+}
+/* Form styles */
+.form-container {
+  padding: 24px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+.form-title {
+  color: #2973B2;
+  margin-bottom: 24px;
+  font-weight: 700;
+}
+.form-subtitle {
+  color: #48A6A7;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+/* Card and hover effects */
+.card-hover {
+  transition: transform 0.3s, box-shadow 0.3s;
+}
+.card-hover:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 10px 30px rgba(73, 166, 167, 0.2) !important;
+}
+/* Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
   }
-  
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.fade-in {
+  animation: fadeIn 0.5s ease-out;
+}
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}
+.floating {
+  animation: float 3s ease-in-out infinite;
+}
+/* Stepper styles */
+.MuiStepLabel-label.Mui-active {
+  color: #48A6A7 !important;
+  font-weight: 600 !important;
+}
+.MuiStepIcon-root.Mui-active {
+  color: #48A6A7 !important;
+}
+.MuiStepIcon-root.Mui-completed {
+  color: #48A6A7 !important;
+}
+/* Date picker styles */
+.MuiPickersDay-root.Mui-selected {
+  background-color: #48A6A7 !important;
+}
+.MuiPickersDay-root.Mui-selected:hover {
+  background-color: #2973B2 !important;
+}
+/* Radio button styles */
+.MuiRadio-root.Mui-checked {
+  color: #48A6A7 !important;
+}
+/* Checkbox styles */
+.MuiCheckbox-root.Mui-checked {
+  color: #48A6A7 !important;
+}
+/* Custom drawer styles */
+.drawer-header {
+  background-color: #2973B2;
+  color: white;
+  padding: 16px;
+}
+.drawer-content {
+  padding: 24px;
+}
+/* Responsive styles */
+@media (max-width: 768px) {
+  .form-container {
+    padding: 16px;
+  }
+  .map-overlay-message {
+    max-width: 90%;
+  }
   .directions {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    width: 25%;
-    padding: 1rem;
-    background: rgba(34, 32, 32, 0.9); /* Slightly transparent white */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
-    border-radius: 12px; /* Rounded edges */
-    border: 1px solid #ddd; /* Light border for a clean look */
-    z-index: 1000; /* Ensure it's above the map */
+    bottom: 10px;
+    left: 10px;
+    max-width: calc(100% - 20px);
   }
-  
-  /* Add styling to headings and paragraphs inside the directions box */
-  .directions h2 {
-    font-size: 1.25rem;
-    margin-bottom: 0.5rem;
-    color: #ffffff;
-  }
-  
-  .directions h3 {
-    font-size: 1rem;
-    margin-top: 0.75rem;
-    margin-bottom: 0.25rem;
-    color: #2f90e0; /* Darker gray for subheadings */
-  }
-  
-  .directions p {
-    margin: 0.25rem 0;
-    font-size: 0.875rem;
-    color: #ffffff;
-  }
-  
+}
