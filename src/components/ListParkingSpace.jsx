@@ -1,4 +1,5 @@
 import "../../styles/global.css";
+import { useAuth } from "../contexts/AuthContext";
 import React, { useState, useEffect, useRef } from "react";
 import { Wrapper } from "@googlemaps/react-wrapper";
 import {
@@ -61,6 +62,7 @@ export default function ListParkingPage() {
 }
 
 function ListParkingMap() {
+  const { currentUser } = useAuth(); //current user definition
   const [map, setMap] = useState(null);
   const [marker, setMarker] = useState(null);
   const [selectedLocation, setSelectedLocation] = useState(null);
@@ -229,7 +231,7 @@ function ListParkingMap() {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     setIsSubmitting(true);
     
     // Create JSON object for submission
@@ -255,8 +257,8 @@ function ListParkingMap() {
         daily: formData.price.daily
       },
       owner: {
-        name: "Current User", // To be replaced with actual user data
-        id: "user_123" // To be replaced with actual user ID
+        name: currentUser.email,
+        id: currentUser.uid
       },
       createdAt: new Date()
     };
@@ -264,17 +266,30 @@ function ListParkingMap() {
     // Log the JSON data for backend integration
     console.log("Listing Data for MongoDB:", JSON.stringify(listingData, null, 2));
     
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
+    try {
+      const response = await fetch("http://localhost:5001/api/listings", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(listingData)
+      });
+      
+      if (!response.ok) {
+        throw new Error(`Error: ${response.statusText}`);
+      }
+      
+      const data = await response.json();
+      console.log("Listing saved:", data);
       setSnackbarOpen(true);
-      // Reset form or redirect
-      setTimeout(() => {
-        setDrawerOpen(false);
-        setActiveStep(0);
-        // Can add redirection here if needed
-      }, 2000);
-    }, 1500);
+      // Optionally reset form or redirect after success:
+      setDrawerOpen(false);
+      setActiveStep(0);
+    } catch (error) {
+      console.error("Error submitting listing:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // Render different drawer content based on active step

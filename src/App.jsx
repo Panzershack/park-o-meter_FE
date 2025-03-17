@@ -36,7 +36,7 @@ function App() {
           {/* Default route */}
           <Route path="*" element={<AuthForm />} />
           <Route path="/selection" element={<SelectionPage />} />
-          <Route path="/list-parking" element={<ListParkingPage />} />
+          <Route path="/list-parking" element={<ProtectedRoute><ListParkingPage /></ProtectedRoute>} />
         </Routes>
       </Router>
     </AuthProvider>
