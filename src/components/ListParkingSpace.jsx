@@ -21,7 +21,8 @@ import {
   CircularProgress,
   Snackbar,
   Alert,
-  Paper
+  Paper,
+  MenuItem
 } from "@mui/material";
 import { 
   LocalParking, 
@@ -29,11 +30,14 @@ import {
   EventAvailable, 
   AttachMoney, 
   ChevronRight,
-  ChevronLeft
+  ChevronLeft,
+  AccessTime
 } from "@mui/icons-material";
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { useNavigate } from 'react-router-dom';
 
 const mapOptions = {
   mapId: import.meta.env.VITE_PUBLIC_MAP_ID,
@@ -53,6 +57,34 @@ const spotTypes = [
 
 const steps = ['Select Location', 'Spot Details', 'Set Availability', 'Review & Submit'];
 
+// Time slots for availability
+const timeSlots = [
+  { value: '00:00', label: '12:00 AM' },
+  { value: '01:00', label: '1:00 AM' },
+  { value: '02:00', label: '2:00 AM' },
+  { value: '03:00', label: '3:00 AM' },
+  { value: '04:00', label: '4:00 AM' },
+  { value: '05:00', label: '5:00 AM' },
+  { value: '06:00', label: '6:00 AM' },
+  { value: '07:00', label: '7:00 AM' },
+  { value: '08:00', label: '8:00 AM' },
+  { value: '09:00', label: '9:00 AM' },
+  { value: '10:00', label: '10:00 AM' },
+  { value: '11:00', label: '11:00 AM' },
+  { value: '12:00', label: '12:00 PM' },
+  { value: '13:00', label: '1:00 PM' },
+  { value: '14:00', label: '2:00 PM' },
+  { value: '15:00', label: '3:00 PM' },
+  { value: '16:00', label: '4:00 PM' },
+  { value: '17:00', label: '5:00 PM' },
+  { value: '18:00', label: '6:00 PM' },
+  { value: '19:00', label: '7:00 PM' },
+  { value: '20:00', label: '8:00 PM' },
+  { value: '21:00', label: '9:00 PM' },
+  { value: '22:00', label: '10:00 PM' },
+  { value: '23:00', label: '11:00 PM' },
+];
+
 export default function ListParkingPage() {
   return (
     <Wrapper apiKey={import.meta.env.VITE_GOOGLE_MAPS_API_KEY}>
@@ -70,6 +102,7 @@ function ListParkingMap() {
   const [activeStep, setActiveStep] = useState(0);
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const navigate = useNavigate();
   
 
   const [formData, setFormData] = useState({
@@ -83,7 +116,9 @@ function ListParkingMap() {
     },
     availability: {
       startDate: new Date(),
-      endDate: new Date(new Date().setMonth(new Date().getMonth() + 3))
+      startTime: '08:00',
+      endDate: new Date(new Date().setMonth(new Date().getMonth() + 3)),
+      endTime: '20:00'
     },
     price: {
       hourly: 1,
@@ -223,6 +258,18 @@ function ListParkingMap() {
     }));
   };
 
+  const handleTimeChange = (name, time) => {
+    setFormData(prev => ({
+      ...prev,
+      availability: {
+        ...prev.availability,
+        [name]: time
+      }
+    }));
+  };
+
+
+
   const handleNext = () => {
     setActiveStep((prevActiveStep) => prevActiveStep + 1);
   };
@@ -230,6 +277,16 @@ function ListParkingMap() {
   const handleBack = () => {
     setActiveStep((prevActiveStep) => prevActiveStep - 1);
   };
+
+  // Format date with time for display
+  const formatDateTime = (date, time) => {
+    const [hours, minutes] = time.split(':');
+    const newDate = new Date(date);
+    newDate.setHours(parseInt(hours), parseInt(minutes), 0);
+    return newDate;
+  };
+
+
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
@@ -249,8 +306,10 @@ function ListParkingMap() {
         length: parseFloat(formData.area.length)
       },
       availability: {
-        startDate: formData.availability.startDate,
-        endDate: formData.availability.endDate
+        startDate: formatDateTime(formData.availability.startDate, formData.availability.startTime),
+        endDate: formatDateTime(formData.availability.endDate, formData.availability.endTime),
+        startTime: formData.availability.startTime,
+        endTime: formData.availability.endTime
       },
       pricing: {
         hourly: formData.price.hourly,
@@ -259,6 +318,15 @@ function ListParkingMap() {
       owner: {
         name: currentUser.email,
         id: currentUser.uid
+      },
+      renter: {
+        name: null,
+        id: null
+      },
+      isRented: false,
+      rentDates: {
+        startDate: null,
+        endDate: null
       },
       createdAt: new Date()
     };
@@ -285,6 +353,11 @@ function ListParkingMap() {
       // Optionally reset form or redirect after success:
       setDrawerOpen(false);
       setActiveStep(0);
+      
+      // Navigate to dashboard after successful submission
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 2000);
     } catch (error) {
       console.error("Error submitting listing:", error);
     } finally {
@@ -443,26 +516,74 @@ function ListParkingMap() {
             </Typography>
             
             <LocalizationProvider dateAdapter={AdapterDateFns}>
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="subtitle1" sx={{ mb: 1 }}>Available From</Typography>
-                <DatePicker
-                  value={formData.availability.startDate}
-                  onChange={(date) => handleDateChange('startDate', date)}
-                  renderInput={(params) => <TextField {...params} fullWidth />}
-                  minDate={new Date()}
-                />
-              </Box>
-              
-              <Box sx={{ mb: 3 }}>
-                <Typography variant="subtitle1" sx={{ mb: 1 }}>Available Until</Typography>
-                <DatePicker
-                  value={formData.availability.endDate}
-                  onChange={(date) => handleDateChange('endDate', date)}
-                  renderInput={(params) => <TextField {...params} fullWidth />}
-                  minDate={formData.availability.startDate}
-                />
-              </Box>
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle1" sx={{ mb: 1 }}>Available From</Typography>
+                  <DatePicker
+                    value={formData.availability.startDate}
+                    onChange={(date) => handleDateChange('startDate', date)}
+                    renderInput={(params) => <TextField {...params} fullWidth />}
+                    minDate={new Date()}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle1" sx={{ mb: 1 }}>Start Time</Typography>
+                  <TextField
+                    select
+                    fullWidth
+                    value={formData.availability.startTime}
+                    onChange={(e) => handleTimeChange('startTime', e.target.value)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <AccessTime />
+                        </InputAdornment>
+                      ),
+                    }}
+                  >
+                    {timeSlots.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Grid>
+                
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle1" sx={{ mb: 1 }}>Available Until</Typography>
+                  <DatePicker
+                    value={formData.availability.endDate}
+                    onChange={(date) => handleDateChange('endDate', date)}
+                    renderInput={(params) => <TextField {...params} fullWidth />}
+                    minDate={formData.availability.startDate}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="subtitle1" sx={{ mb: 1 }}>End Time</Typography>
+                  <TextField
+                    select
+                    fullWidth
+                    value={formData.availability.endTime}
+                    onChange={(e) => handleTimeChange('endTime', e.target.value)}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <AccessTime />
+                        </InputAdornment>
+                      ),
+                    }}
+                  >
+                    {timeSlots.map((option) => (
+                      <MenuItem key={option.value} value={option.value}>
+                        {option.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                </Grid>
+              </Grid>
             </LocalizationProvider>
+            
+
             
             <Typography variant="subtitle1" sx={{ mt: 3, mb: 1, color: '#2973B2' }}>
               Pricing (Automatically Calculated)
@@ -563,12 +684,23 @@ function ListParkingMap() {
               
               <Box sx={{ mt: 1 }}>
                 <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
-                  Available:
+                  Available Period:
                 </Typography>
                 <Typography variant="body2">
                   {formData.availability.startDate.toLocaleDateString()} to {formData.availability.endDate.toLocaleDateString()}
                 </Typography>
               </Box>
+              
+              <Box sx={{ mt: 1 }}>
+                <Typography variant="body2" sx={{ fontWeight: 'bold' }}>
+                  Daily Hours:
+                </Typography>
+                <Typography variant="body2">
+                  {formData.availability.startTime.replace(':', ':')} - {formData.availability.endTime.replace(':', ':')}
+                </Typography>
+              </Box>
+              
+
               
               <Box sx={{ mt: 1 }}>
                 <Typography variant="body2" sx={{ fontWeight: 'bold' }}>

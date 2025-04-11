@@ -1,4 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import heroImage from '../assets/LandingPage1.png';
+import appFlowImage from '../assets/LandingPage2.png';
+import testimonial1 from '../assets/testimonial1.jpg';
+import testimonial2 from '../assets/testimonial2.jpg';
+import testimonial3 from '../assets/testimonial3.jpg';
 import { 
   AppBar, 
   Toolbar, 
@@ -36,6 +42,7 @@ import '../../styles/LandingPage.css';
 const ParkOMeter = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const navigate = useNavigate();
 
   return (
     <>
@@ -55,7 +62,7 @@ const ParkOMeter = () => {
                 Find safe, affordable parking in busy urban areas. Use real-time location data to discover available spots within your selected radius and book in advance.
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2, mt: 4 }}>
-                <Button variant="contained" size="large" className="download-button">
+                <Button variant="contained" size="large" className="download-button" onClick={() => navigate("/selection")}>
                   Get Started
                 </Button>
                 <Button variant="outlined" size="large" className="learn-button">
@@ -68,7 +75,8 @@ const ParkOMeter = () => {
                 component="img"
                 className="hero-image"
                 alt="Park-O-Meter App Showcase"
-                src="https://via.placeholder.com/600x400?text=Park-O-Meter+App"
+                src={heroImage}
+                sx={{ width: '100%', maxWidth: isMobile ? '90%' : '80%', borderRadius: 2 }}
               />
             </Grid>
           </Grid>
@@ -108,20 +116,12 @@ const ParkOMeter = () => {
                   />
                 </Grid>
                 <Grid item xs={12} md={2}>
-                  <TextField
-                    fullWidth
-                    placeholder="Time"
-                    variant="outlined"
-                    type="time"
-                    InputLabelProps={{ shrink: true }}
-                  />
-                </Grid>
-                <Grid item xs={12} md={2}>
                   <Button 
                     fullWidth 
                     variant="contained" 
                     className="search-button"
                     size="large"
+                    onClick={() => navigate("/find-parking")}
                   >
                     Search
                   </Button>
@@ -284,7 +284,7 @@ const ParkOMeter = () => {
                 component="img"
                 className="how-it-works-image"
                 alt="Park-O-Meter App Flow"
-                src="https://via.placeholder.com/600x600?text=App+Flow+Diagram"
+                src={appFlowImage}
               />
             </Grid>
           </Grid>
@@ -375,7 +375,7 @@ const ParkOMeter = () => {
             <Grid item xs={12} md={4}>
               <Box className="testimonial-card">
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <Avatar className="testimonial-avatar" src="https://via.placeholder.com/150" />
+                  <Avatar className="testimonial-avatar" src={testimonial1} />
                   <Typography variant="h6" component="h3" className="testimonial-name">
                     Sarah Johnson
                   </Typography>
@@ -392,7 +392,7 @@ const ParkOMeter = () => {
             <Grid item xs={12} md={4}>
               <Box className="testimonial-card">
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <Avatar className="testimonial-avatar" src="https://via.placeholder.com/150" />
+                  <Avatar className="testimonial-avatar" src={testimonial2} />
                   <Typography variant="h6" component="h3" className="testimonial-name">
                     James Wilson
                   </Typography>
@@ -409,7 +409,7 @@ const ParkOMeter = () => {
             <Grid item xs={12} md={4}>
               <Box className="testimonial-card">
                 <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                  <Avatar className="testimonial-avatar" src="https://via.placeholder.com/150" />
+                  <Avatar className="testimonial-avatar" src={testimonial3} />
                   <Typography variant="h6" component="h3" className="testimonial-name">
                     Emily Brown
                   </Typography>

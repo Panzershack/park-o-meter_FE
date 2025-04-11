@@ -8,7 +8,7 @@ const UserSelectionPage = () => {
   const navigate = useNavigate();
 
   const handleRent = () => {
-    navigate('/book-parking');
+    navigate('/find-parking');
   };
 
   const handleList = () => {

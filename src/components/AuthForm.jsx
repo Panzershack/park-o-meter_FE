@@ -1,185 +1,270 @@
-import React, { useState } from "react";
-import { Box, Paper, Typography, TextField, Button, Link } from "@mui/material";
-import { useNavigate, useLocation } from "react-router-dom";
-import { signInWithEmailAndPassword, createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../firebase";
+import React, { useState, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { 
+  Box, 
+  Typography, 
+  TextField, 
+  Button, 
+  Card, 
+  CardContent, 
+  Alert, 
+  InputAdornment, 
+  IconButton,
+  Grid
+} from '@mui/material';
+import { Email, Lock, Visibility, VisibilityOff, Person } from '@mui/icons-material';
 
 export default function AuthForm() {
   const [isLogin, setIsLogin] = useState(true);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  
+  const emailRef = useRef();
+  const passwordRef = useRef();
+  const passwordConfirmRef = useRef();
+  const firstNameRef = useRef();
+  const lastNameRef = useRef();
+  
+  const { login, signup } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
 
-  // Determine where to redirect after login/signup; default to "/map"
-  const from = location.state?.from?.pathname || "/map";
-
-  const toggleForm = (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
-    setError("");
-    setIsLogin((prev) => !prev);
-  };
+    
+    if (!isLogin && passwordRef.current.value !== passwordConfirmRef.current.value) {
+      return setError('Passwords do not match');
+    }
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setError("");
+    if (!isLogin && (!firstNameRef.current.value || !lastNameRef.current.value)) {
+      return setError('Please provide both first and last name');
+    }
+    
     try {
-      await signInWithEmailAndPassword(auth, email, password);
-      // Redirect to the originally intended route (or default /map)
-      navigate(from, { replace: true });
+      setError('');
+      setLoading(true);
+      
+      if (isLogin) {
+        // Login
+        await login(emailRef.current.value, passwordRef.current.value);
+        navigate('/');
+      } else {
+        // Signup
+        const userCredential = await signup(emailRef.current.value, passwordRef.current.value);
+        
+        // After successful Firebase signup, create user in MongoDB
+        const userData = {
+          firebaseUID: userCredential.user.uid,
+          email: emailRef.current.value,
+          firstName: firstNameRef.current.value,
+          lastName: lastNameRef.current.value,
+          rentedSpots: 0,
+          listingCount: 0
+        };
+        
+        // Send user data to backend
+        const response = await fetch('http://localhost:5001/api/users', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(userData),
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to create user profile');
+        }
+        
+        navigate('/');
+      }
     } catch (err) {
       setError(err.message);
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleSignup = async (e) => {
-    e.preventDefault();
-    setError("");
-    if (password !== confirmPassword) {
-      return setError("Passwords do not match");
-    }
-    try {
-      await createUserWithEmailAndPassword(auth, email, password);
-      // Redirect to the originally intended route (or default /map)
-      navigate(from, { replace: true });
-    } catch (err) {
-      setError(err.message);
-    }
-  };
+  }
 
   return (
     <Box
       sx={{
-        height: "100vh",
-        backgroundColor: "primary.main",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh',
+        p: 2,
+        bgcolor: '#F2EFE7'
       }}
     >
-      <Paper
-        elevation={3}
-        sx={{
-          maxWidth: 430,
-          width: "100%",
-          p: 4,
-          borderRadius: 2,
+      <Card 
+        sx={{ 
+          maxWidth: 500, 
+          width: '100%', 
+          borderRadius: 3,
+          boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)'
         }}
       >
-        {isLogin ? (
-          <Box component="form" noValidate autoComplete="off" onSubmit={handleLogin}>
-            <Typography variant="h4" align="center" gutterBottom>
-              Login
-            </Typography>
-            {error && <Typography color="error">{error}</Typography>}
+        <CardContent sx={{ p: 4 }}>
+          <Typography 
+            variant="h4" 
+            component="h1" 
+            gutterBottom
+            sx={{ 
+              color: '#2973B2', 
+              fontWeight: 700,
+              textAlign: 'center',
+              mb: 3
+            }}
+          >
+            {isLogin ? 'Welcome Back' : 'Create Account'}
+          </Typography>
+          
+          {error && (
+            <Alert severity="error" sx={{ mb: 3 }}>
+              {error}
+            </Alert>
+          )}
+          
+          <Box component="form" onSubmit={handleSubmit} noValidate>
+            {!isLogin && (
+              <Grid container spacing={2} sx={{ mb: 2 }}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    required
+                    fullWidth
+                    id="firstName"
+                    label="First Name"
+                    name="firstName"
+                    inputRef={firstNameRef}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Person sx={{ color: '#48A6A7' }} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    required
+                    fullWidth
+                    id="lastName"
+                    label="Last Name"
+                    name="lastName"
+                    inputRef={lastNameRef}
+                    InputProps={{
+                      startAdornment: (
+                        <InputAdornment position="start">
+                          <Person sx={{ color: '#48A6A7' }} />
+                        </InputAdornment>
+                      ),
+                    }}
+                  />
+                </Grid>
+              </Grid>
+            )}
+            
             <TextField
+              required
               fullWidth
+              id="email"
+              label="Email Address"
+              name="email"
+              autoComplete="email"
               margin="normal"
-              label="Enter your email"
-              variant="outlined"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              inputRef={emailRef}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Email sx={{ color: '#48A6A7' }} />
+                  </InputAdornment>
+                ),
+              }}
             />
+            
             <TextField
+              required
               fullWidth
+              name="password"
+              label="Password"
+              type={showPassword ? 'text' : 'password'}
+              id="password"
+              autoComplete={isLogin ? 'current-password' : 'new-password'}
               margin="normal"
-              type="password"
-              label="Enter your password"
-              variant="outlined"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              inputRef={passwordRef}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <Lock sx={{ color: '#48A6A7' }} />
+                  </InputAdornment>
+                ),
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={() => setShowPassword(!showPassword)}
+                      edge="end"
+                    >
+                      {showPassword ? <VisibilityOff /> : <Visibility />}
+                    </IconButton>
+                  </InputAdornment>
+                )
+              }}
             />
-            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
-              <Link
-                href="#"
-                underline="hover"
-                color="primary"
-                onClick={(e) => e.preventDefault()}
-              >
-                Forgot password?
-              </Link>
-            </Box>
+            
+            {!isLogin && (
+              <TextField
+                required
+                fullWidth
+                name="confirmPassword"
+                label="Confirm Password"
+                type={showPassword ? 'text' : 'password'}
+                id="confirmPassword"
+                margin="normal"
+                inputRef={passwordConfirmRef}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <Lock sx={{ color: '#48A6A7' }} />
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            )}
+            
             <Button
+              type="submit"
               fullWidth
               variant="contained"
-              color="primary"
-              sx={{ mt: 2, py: 1.5 }}
-              type="submit"
+              disabled={loading}
+              sx={{ 
+                mt: 3,
+                mb: 2,
+                py: 1.5,
+                bgcolor: '#48A6A7',
+                '&:hover': {
+                  bgcolor: '#2973B2',
+                },
+                fontSize: '1rem',
+                fontWeight: 600 
+              }}
             >
-              Login
+              {loading ? 'Processing...' : isLogin ? 'Sign In' : 'Sign Up'}
             </Button>
-            <Typography variant="body1" align="center" sx={{ mt: 2 }}>
-              Don't have an account?{" "}
-              <Link
-                component="button"
-                variant="body1"
-                onClick={toggleForm}
-                underline="hover"
-                color="primary"
-              >
-                Signup
-              </Link>
+            
+            <Typography 
+              variant="body2" 
+              align="center" 
+              color="text.secondary" 
+              sx={{ cursor: 'pointer' }}
+              onClick={() => setIsLogin(!isLogin)}
+            >
+              {isLogin ? "Don't have an account? Sign Up" : "Already have an account? Sign In"}
             </Typography>
           </Box>
-        ) : (
-          <Box component="form" noValidate autoComplete="off" onSubmit={handleSignup}>
-            <Typography variant="h4" align="center" gutterBottom>
-              Signup
-            </Typography>
-            {error && <Typography color="error">{error}</Typography>}
-            <TextField
-              fullWidth
-              margin="normal"
-              label="Enter your email"
-              variant="outlined"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <TextField
-              fullWidth
-              margin="normal"
-              type="password"
-              label="Create a password"
-              variant="outlined"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-            <TextField
-              fullWidth
-              margin="normal"
-              type="password"
-              label="Confirm your password"
-              variant="outlined"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-            />
-            <Button
-              fullWidth
-              variant="contained"
-              color="primary"
-              sx={{ mt: 2, py: 1.5 }}
-              type="submit"
-            >
-              Signup
-            </Button>
-            <Typography variant="body1" align="center" sx={{ mt: 2 }}>
-              Already have an account?{" "}
-              <Link
-                component="button"
-                variant="body1"
-                onClick={toggleForm}
-                underline="hover"
-                color="primary"
-              >
-                Login
-              </Link>
-            </Typography>
-          </Box>
-        )}
-      </Paper>
+        </CardContent>
+      </Card>
     </Box>
   );
 }

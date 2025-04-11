@@ -35,9 +35,6 @@ body {
   left: 0;
   width: 100%;
   height: 150px;
-  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%239acbd0" fill-opacity="0.3" d="M0,224L48,213.3C96,203,192,181,288,181.3C384,181,480,203,576,202.7C672,203,768,181,864,181.3C960,181,1056,203,1152,208C1248,213,1344,203,1392,197.3L1440,192L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
-  background-repeat: no-repeat;
-  background-size: cover;
   z-index: 1;
 }
 
@@ -93,8 +90,6 @@ body {
 .hero-image {
   max-width: 100%;
   height: auto;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
 }
 
 /* Search Section */
@@ -236,13 +231,12 @@ body {
 .step-title {
   color: var(--primary-color) !important;
   margin-bottom: 10px !important;
+  font-weight: bold !important;
 }
 
 .how-it-works-image {
   max-width: 100%;
   height: auto;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.15);
 }
 
 /* Benefits Section */

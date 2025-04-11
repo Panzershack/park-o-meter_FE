@@ -10,6 +10,8 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import LandingPage from "./components/LandingPage";
 import SelectionPage from "./components/UserSelectionPage";
 import ListParkingPage from "./components/ListParkingSpace";
+import FindParkingPage from "./components/FindParkingPage";
+import UserDashboard from "./components/UserDashBoard";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
@@ -37,6 +39,9 @@ function App() {
           <Route path="*" element={<AuthForm />} />
           <Route path="/selection" element={<SelectionPage />} />
           <Route path="/list-parking" element={<ProtectedRoute><ListParkingPage /></ProtectedRoute>} />
+          <Route path="/find-parking" element={<ProtectedRoute><FindParkingPage /></ProtectedRoute>} />
+          <Route path="/dashboard" element={<ProtectedRoute><UserDashboard /></ProtectedRoute>} />
+
         </Routes>
       </Router>
     </AuthProvider>
